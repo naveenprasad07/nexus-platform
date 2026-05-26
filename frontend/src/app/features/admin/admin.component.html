@@ -1,0 +1,205 @@
+<div class="admin-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">User Management</h1>
+      <p class="page-subtitle">{{ meta()?.total ?? 0 }} registered users on the platform</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreate()">
+      <mat-icon>person_add</mat-icon>
+      Add User
+    </button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row stagger-children" *ngIf="stats()">
+    <div class="mini-stat card">
+      <mat-icon class="mini-icon" style="color: var(--color-info)">group</mat-icon>
+      <div>
+        <div class="mini-value">{{ stats()!.total }}</div>
+        <div class="mini-label">Total Users</div>
+      </div>
+    </div>
+    <div class="mini-stat card">
+      <mat-icon class="mini-icon" style="color: var(--color-success)">check_circle</mat-icon>
+      <div>
+        <div class="mini-value">{{ stats()!.active }}</div>
+        <div class="mini-label">Active</div>
+      </div>
+    </div>
+    <div class="mini-stat card">
+      <mat-icon class="mini-icon" style="color: var(--color-primary-400)">admin_panel_settings</mat-icon>
+      <div>
+        <div class="mini-value">{{ stats()!.admins }}</div>
+        <div class="mini-label">Admins</div>
+      </div>
+    </div>
+    <div class="mini-stat card">
+      <mat-icon class="mini-icon" style="color: var(--color-warning)">person_off</mat-icon>
+      <div>
+        <div class="mini-value">{{ stats()!.total - stats()!.active }}</div>
+        <div class="mini-label">Inactive</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar card">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search users…</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="searchCtrl" placeholder="Name, email, or ID">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Role</mat-label>
+      <mat-select [formControl]="roleCtrl" (selectionChange)="onFilterChange()">
+        <mat-option value="">All roles</mat-option>
+        <mat-option value="admin">Admin</mat-option>
+        <mat-option value="user">User</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <mat-progress-bar mode="indeterminate" *ngIf="isLoading()" class="loading-bar"></mat-progress-bar>
+
+  <!-- Error -->
+  <div class="empty-state card" *ngIf="!isLoading() && error()">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Failed to load users</h3>
+    <p>{{ error() }}</p>
+    <button mat-flat-button color="primary" (click)="loadUsers()" style="margin-top:16px">Retry</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container card" *ngIf="!error()">
+
+    <div class="skeleton-rows" *ngIf="isLoading()">
+      <div class="skeleton skeleton-row" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <table mat-table [dataSource]="users()" *ngIf="!isLoading()" class="users-table">
+
+      <!-- User Column -->
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef>User</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="user-cell">
+            <div class="user-av" [class.admin-av]="row.role === 'admin'">
+              {{ row.firstName?.charAt(0) }}{{ row.lastName?.charAt(0) }}
+            </div>
+            <div class="user-info">
+              <span class="user-full-name">{{ row.firstName }} {{ row.lastName }}</span>
+              <span class="user-email">{{ row.email }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- User ID Column -->
+      <ng-container matColumnDef="userId">
+        <th mat-header-cell *matHeaderCellDef>User ID</th>
+        <td mat-cell *matCellDef="let row">
+          <code class="user-id">{{ row.userId }}</code>
+        </td>
+      </ng-container>
+
+      <!-- Role Column -->
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="badge" [ngClass]="row.role === 'admin' ? 'role-admin' : 'role-user'">
+            <mat-icon>{{ row.role === 'admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+            {{ row.role | titlecase }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Department Column -->
+      <ng-container matColumnDef="department">
+        <th mat-header-cell *matHeaderCellDef>Department</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="dept-chip">{{ row.department }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="badge" [ngClass]="row.isActive ? 'status-active' : 'status-cancelled'">
+            {{ row.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Last Login Column -->
+      <ng-container matColumnDef="lastLogin">
+        <th mat-header-cell *matHeaderCellDef>Last Login</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="login-date text-muted font-mono" *ngIf="row.lastLogin">
+            {{ row.lastLogin | date: 'MMM d, h:mm a' }}
+          </span>
+          <span class="text-muted" *ngIf="!row.lastLogin">Never</span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row" class="actions-cell">
+          <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="openEdit(row)">
+              <mat-icon>edit</mat-icon> Edit User
+            </button>
+            <button mat-menu-item (click)="toggleActive(row)">
+              <mat-icon>{{ row.isActive ? 'person_off' : 'how_to_reg' }}</mat-icon>
+              {{ row.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+            <button mat-menu-item (click)="changeRole(row, row.role === 'admin' ? 'user' : 'admin')">
+              <mat-icon>swap_horiz</mat-icon>
+              Switch to {{ row.role === 'admin' ? 'User' : 'Admin' }}
+            </button>
+            <mat-divider></mat-divider>
+            <button
+              mat-menu-item
+              class="danger-item"
+              (click)="deleteUser(row)"
+              [disabled]="row._id === currentUserId()"
+            >
+              <mat-icon color="warn">delete</mat-icon> Delete
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [trackBy]="trackByUser"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td [attr.colspan]="displayedColumns.length">
+          <div class="empty-state">
+            <mat-icon>group_off</mat-icon>
+            <h3>No users found</h3>
+            <p>Try adjusting your search or add a new user</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="paginator-row" *ngIf="meta() && !isLoading()">
+      <span class="text-muted font-mono" style="font-size:13px">{{ meta()!.total }} users</span>
+      <mat-paginator
+        [length]="meta()!.total"
+        [pageSize]="query.limit!"
+        [pageIndex]="(query.page ?? 1) - 1"
+        [pageSizeOptions]="[10, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+      ></mat-paginator>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,192 @@
+<div class="dashboard">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">
+        Here's your overview for today — {{ user()?.department }} team
+      </p>
+    </div>
+    <button mat-flat-button color="primary" (click)="loadAnalytics()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Loading Skeletons -->
+  <ng-container *ngIf="isLoading()">
+    <div class="stats-grid stagger-children">
+      <div class="skeleton stat-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+    <div class="content-grid">
+      <div class="skeleton content-skeleton"></div>
+      <div class="skeleton content-skeleton"></div>
+    </div>
+  </ng-container>
+
+  <!-- Error State -->
+  <div class="empty-state" *ngIf="!isLoading() && error()">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Failed to load data</h3>
+    <p>{{ error() }}</p>
+    <button mat-flat-button color="primary" (click)="loadAnalytics()" style="margin-top: 16px">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Analytics Content -->
+  <ng-container *ngIf="!isLoading() && !error() && analytics()">
+
+    <!-- Stat Cards -->
+    <div class="stats-grid stagger-children">
+      <div
+        class="stat-card"
+        *ngFor="let card of statCards()"
+        [routerLink]="card.route ?? null"
+        [class.clickable]="card.route"
+      >
+        <div class="stat-header">
+          <div class="stat-icon" [ngClass]="'icon-' + card.color">
+            <mat-icon>{{ card.icon }}</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">{{ card.value }}</div>
+        <div class="stat-label">{{ card.label }}</div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid stagger-children">
+
+      <!-- Priority Breakdown -->
+      <div class="card">
+        <div class="card-title-row">
+          <h3 class="section-title">Priority Breakdown</h3>
+          <span class="text-muted font-mono" style="font-size: 12px">
+            {{ analytics()!.totalRecords }} total
+          </span>
+        </div>
+
+        <div class="priority-bars">
+          <div
+            class="priority-row"
+            *ngFor="let p of analytics()!.recordsByPriority"
+          >
+            <div class="priority-label">
+              <span class="badge" [ngClass]="'priority-' + p._id">{{ p._id }}</span>
+              <span class="priority-count">{{ p.count }}</span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [ngClass]="'fill-' + p._id"
+                [style.width.%]="getPriorityWidth(p.count, maxPriorityCount)"
+              ></div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="!analytics()!.recordsByPriority?.length">
+            <mat-icon>bar_chart</mat-icon>
+            <p>No priority data yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Breakdown -->
+      <div class="card">
+        <div class="card-title-row">
+          <h3 class="section-title">Status Distribution</h3>
+          <span class="text-muted font-mono" style="font-size: 12px">
+            {{ analytics()!.completionRate }}% complete
+          </span>
+        </div>
+
+        <div class="status-items">
+          <div class="status-item" *ngFor="let s of analytics()!.recordsByStatus">
+            <div class="status-dot" [ngClass]="'status-' + s._id"></div>
+            <span class="status-name" [ngClass]="'status-' + s._id">{{ s._id | titlecase }}</span>
+            <span class="status-count">{{ s.count }}</span>
+          </div>
+        </div>
+
+        <!-- Completion progress arc visual -->
+        <div class="completion-ring">
+          <div class="ring-label">
+            <span class="ring-value">{{ analytics()!.completionRate }}%</span>
+            <span class="ring-sublabel">Done</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card activity-card" *ngIf="isAdmin()">
+        <div class="card-title-row">
+          <h3 class="section-title">Recent Activity</h3>
+          <a routerLink="/admin" class="view-all-link">View all</a>
+        </div>
+
+        <div class="activity-list">
+          <div
+            class="activity-item"
+            *ngFor="let log of analytics()!.recentActivity; trackBy: trackByLog"
+          >
+            <div class="activity-icon">
+              <mat-icon>{{ getActionIcon(log.action) }}</mat-icon>
+            </div>
+            <div class="activity-details">
+              <span class="activity-text">
+                <strong>{{ log.userId?.firstName }} {{ log.userId?.lastName }}</strong>
+                {{ getActionLabel(log.action) }}
+              </span>
+              <span class="activity-time">
+                {{ log.createdAt | date: 'MMM d, h:mm a' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="!analytics()!.recentActivity?.length">
+            <mat-icon>timeline</mat-icon>
+            <p>No recent activity</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Week Summary Card -->
+      <div class="card">
+        <div class="card-title-row">
+          <h3 class="section-title">Week Summary</h3>
+          <span class="badge status-active">Live</span>
+        </div>
+
+        <div class="week-stats">
+          <div class="week-stat">
+            <div class="week-stat-value text-accent">{{ analytics()!.recordsThisWeek }}</div>
+            <div class="week-stat-label">New this week</div>
+          </div>
+          <div class="week-divider"></div>
+          <div class="week-stat">
+            <div class="week-stat-value text-success">{{ analytics()!.completedRecords }}</div>
+            <div class="week-stat-label">Completed</div>
+          </div>
+          <div class="week-divider" *ngIf="isAdmin()"></div>
+          <div class="week-stat" *ngIf="isAdmin()">
+            <div class="week-stat-value" style="color: var(--color-info)">{{ analytics()!.activeUsers }}</div>
+            <div class="week-stat-label">Active users</div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <a class="quick-action" routerLink="/records">
+            <mat-icon>table_chart</mat-icon>
+            <span>View Records</span>
+          </a>
+          <a class="quick-action" routerLink="/admin" *ngIf="isAdmin()">
+            <mat-icon>manage_accounts</mat-icon>
+            <span>Manage Users</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

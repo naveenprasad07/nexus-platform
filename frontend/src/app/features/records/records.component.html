@@ -1,0 +1,207 @@
+<div class="records-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Records</h1>
+      <p class="page-subtitle">
+        {{ meta()?.total ?? 0 }} total &mdash;
+        {{ isAdmin() ? 'All team records' : 'Your assigned records' }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="exportCsv()" matTooltip="Export to CSV">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+      <button mat-flat-button color="primary" (click)="openCreate()" *ngIf="isAdmin()">
+        <mat-icon>add</mat-icon>
+        New Record
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar card">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search records…</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="searchCtrl" placeholder="Title or description">
+      <button mat-icon-button matSuffix *ngIf="searchCtrl.value" (click)="searchCtrl.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="statusCtrl" (selectionChange)="onFilterChange()">
+        <mat-option value="">All statuses</mat-option>
+        <mat-option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Priority</mat-label>
+      <mat-select [formControl]="priorityCtrl" (selectionChange)="onFilterChange()">
+        <mat-option value="">All priorities</mat-option>
+        <mat-option *ngFor="let p of priorities" [value]="p">{{ p | titlecase }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
+      <mat-icon>filter_list_off</mat-icon>
+      Clear
+    </button>
+  </div>
+
+  <!-- Loading Progress -->
+  <mat-progress-bar mode="indeterminate" *ngIf="isLoading()" class="loading-bar"></mat-progress-bar>
+
+  <!-- Error State -->
+  <div class="empty-state card" *ngIf="!isLoading() && error()">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Failed to load records</h3>
+    <p>{{ error() }}</p>
+    <button mat-flat-button color="primary" (click)="loadRecords()" style="margin-top: 16px">
+      Retry
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container card" *ngIf="!error()">
+
+    <!-- Skeleton rows while loading -->
+    <div class="skeleton-rows" *ngIf="isLoading()">
+      <div class="skeleton skeleton-row" *ngFor="let i of [1,2,3,4,5,6,7]"></div>
+    </div>
+
+    <!-- Data Table -->
+    <table
+      mat-table
+      [dataSource]="records()"
+      matSort
+      (matSortChange)="onSortChange($event)"
+      *ngIf="!isLoading()"
+      class="records-table"
+    >
+
+      <!-- Title Column -->
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+        <td mat-cell *matCellDef="let row" class="title-cell">
+          <div class="title-content">
+            <span class="record-title">{{ row.title }}</span>
+            <div class="record-tags">
+              <span class="tag" *ngFor="let tag of row.tags | slice:0:2">{{ tag }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="badge" [ngClass]="'status-' + row.status">
+            {{ row.status | titlecase }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Priority Column -->
+      <ng-container matColumnDef="priority">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Priority</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="badge" [ngClass]="'priority-' + row.priority">
+            {{ row.priority | titlecase }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Assigned To Column -->
+      <ng-container matColumnDef="assignedTo">
+        <th mat-header-cell *matHeaderCellDef>Assigned To</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="assignee" *ngIf="row.assignedTo">
+            <div class="assignee-avatar">
+              {{ row.assignedTo.firstName?.charAt(0) }}{{ row.assignedTo.lastName?.charAt(0) }}
+            </div>
+            <div class="assignee-info">
+              <span class="assignee-name">{{ row.assignedTo.firstName }} {{ row.assignedTo.lastName }}</span>
+              <span class="assignee-dept">{{ row.assignedTo.department }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Due Date Column -->
+      <ng-container matColumnDef="dueDate">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="due-date" *ngIf="row.dueDate"
+            [class.overdue]="row.dueDate && row.status !== 'completed' && (row.dueDate | date:'yyyyMMdd') < ('' | date:'yyyyMMdd')!"
+          >
+            {{ row.dueDate | date: 'MMM d, yyyy' }}
+          </span>
+          <span class="text-muted" *ngIf="!row.dueDate">—</span>
+        </td>
+      </ng-container>
+
+      <!-- Category Column -->
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Category</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="category-chip">{{ row.metadata.category | titlecase }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row" class="actions-cell">
+          <button mat-icon-button (click)="openEdit(row)" matTooltip="Edit record">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="deleteRecord(row)"
+            matTooltip="Delete record"
+            *ngIf="isAdmin()"
+          >
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns();" [trackBy]="trackByRecord"></tr>
+
+      <!-- Empty state row -->
+      <tr class="mat-row" *matNoDataRow>
+        <td [attr.colspan]="displayedColumns().length">
+          <div class="empty-state">
+            <mat-icon>table_chart</mat-icon>
+            <h3>No records found</h3>
+            <p>Try adjusting your filters or create a new record</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Paginator -->
+    <div class="paginator-row" *ngIf="meta() && !isLoading()">
+      <span class="paginator-info text-muted">
+        Showing {{ ((meta()!.page - 1) * meta()!.limit) + 1 }}–{{ [meta()!.page * meta()!.limit, meta()!.total] | min }} of {{ meta()!.total }}
+      </span>
+      <mat-paginator
+        [length]="meta()!.total"
+        [pageSize]="query.limit!"
+        [pageIndex]="(query.page ?? 1) - 1"
+        [pageSizeOptions]="[10, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+      ></mat-paginator>
+    </div>
+  </div>
+</div>

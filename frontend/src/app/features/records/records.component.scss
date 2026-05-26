@@ -1,0 +1,110 @@
+.records-page { max-width: 1400px; margin: 0 auto; }
+
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: var(--spacing-xl); gap: var(--spacing-md);
+}
+.page-title { font-size: 26px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 4px; letter-spacing: -0.5px; }
+.page-subtitle { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
+.header-actions { display: flex; gap: var(--spacing-sm); flex-shrink: 0; }
+
+// ─── Filter Bar ───────────────────────────────────────────────────────────────
+
+.filter-bar {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--spacing-sm); margin-bottom: var(--spacing-md); padding: var(--spacing-md);
+}
+.search-field { flex: 1; min-width: 220px; margin-bottom: 0 !important; }
+.filter-field { width: 160px; margin-bottom: 0 !important; }
+.clear-btn { height: 56px; flex-shrink: 0; }
+
+.loading-bar {
+  margin-bottom: var(--spacing-xs);
+  border-radius: var(--radius-full);
+  .mdc-linear-progress__bar { border-radius: var(--radius-full); }
+}
+
+// ─── Table Container ──────────────────────────────────────────────────────────
+
+.table-container { padding: 0; overflow: hidden; }
+
+.skeleton-rows { padding: var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-sm); }
+.skeleton-row  { height: 52px; border-radius: var(--radius-sm); }
+
+.records-table { width: 100%; }
+
+// ─── Title Cell ───────────────────────────────────────────────────────────────
+
+.title-cell { max-width: 340px; }
+
+.title-content { display: flex; flex-direction: column; gap: 4px; padding: var(--spacing-sm) 0; }
+
+.record-title {
+  font-size: 14px; font-weight: 500; color: var(--color-text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;
+}
+
+.record-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.tag {
+  font-size: 11px; padding: 1px 6px;
+  background: var(--color-surface-2); border: 1px solid var(--color-border);
+  border-radius: var(--radius-full); color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+// ─── Assignee ─────────────────────────────────────────────────────────────────
+
+.assignee { display: flex; align-items: center; gap: var(--spacing-sm); }
+
+.assignee-avatar {
+  width: 28px; height: 28px; min-width: 28px;
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-500));
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; text-transform: uppercase;
+}
+
+.assignee-info { display: flex; flex-direction: column; }
+.assignee-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; }
+.assignee-dept { font-size: 11px; color: var(--color-text-muted); }
+
+// ─── Due Date ─────────────────────────────────────────────────────────────────
+
+.due-date {
+  font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary);
+  &.overdue { color: var(--color-error); }
+}
+
+// ─── Category Chip ────────────────────────────────────────────────────────────
+
+.category-chip {
+  font-size: 11px; padding: 2px 8px;
+  background: var(--color-surface-2); border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm); color: var(--color-text-secondary);
+  font-weight: 500; white-space: nowrap;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+
+.actions-cell {
+  white-space: nowrap;
+  button { opacity: 0; transition: opacity var(--transition-fast); }
+}
+.mat-mdc-row:hover .actions-cell button { opacity: 1; }
+
+// ─── Paginator Row ────────────────────────────────────────────────────────────
+
+.paginator-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--spacing-md); border-top: 1px solid var(--color-border-soft);
+  flex-wrap: wrap;
+}
+.paginator-info { font-size: 13px; font-family: var(--font-mono); }
+
+@media (max-width: 768px) {
+  .page-header { flex-direction: column; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .search-field, .filter-field { width: 100%; }
+  .header-actions { width: 100%; button { flex: 1; } }
+}

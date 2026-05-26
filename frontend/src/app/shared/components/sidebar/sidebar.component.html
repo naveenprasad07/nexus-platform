@@ -1,0 +1,48 @@
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <!-- Logo -->
+  <div class="sidebar-brand">
+    <div class="brand-icon">N</div>
+    <span class="brand-label" *ngIf="!collapsed">Nexus</span>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of visibleItems"
+      class="nav-item"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [matTooltip]="collapsed ? item.label : ''"
+      matTooltipPosition="right"
+      matRipple
+    >
+      <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+      <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
+      <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
+    </a>
+  </nav>
+
+  <!-- User Profile -->
+  <div class="sidebar-footer">
+    <div class="user-info" *ngIf="!collapsed">
+      <div class="user-avatar">
+        {{ user()?.firstName?.charAt(0) }}{{ user()?.lastName?.charAt(0) }}
+      </div>
+      <div class="user-details">
+        <span class="user-name">{{ user()?.firstName }} {{ user()?.lastName }}</span>
+        <span class="user-role">{{ user()?.role | titlecase }}</span>
+      </div>
+    </div>
+
+    <button
+      class="logout-btn"
+      (click)="logout()"
+      [matTooltip]="collapsed ? 'Logout' : ''"
+      matTooltipPosition="right"
+      matRipple
+    >
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="!collapsed">Logout</span>
+    </button>
+  </div>
+</aside>

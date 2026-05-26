@@ -1,0 +1,66 @@
+<div class="profile-page">
+  <div class="page-header">
+    <h1 class="page-title">My Profile</h1>
+    <p class="page-subtitle">Manage your personal information and preferences</p>
+  </div>
+
+  <div class="profile-grid">
+    <!-- Avatar Card -->
+    <div class="avatar-card card">
+      <div class="profile-avatar">{{ initials() }}</div>
+      <h2 class="profile-name">{{ user()?.firstName }} {{ user()?.lastName }}</h2>
+      <span class="badge" [ngClass]="isAdmin() ? 'role-admin-badge' : 'role-user-badge'">
+        <mat-icon>{{ isAdmin() ? 'admin_panel_settings' : 'person' }}</mat-icon>
+        {{ user()?.role | titlecase }}
+      </span>
+      <p class="profile-dept">{{ user()?.department }}</p>
+
+      <mat-divider class="divider"></mat-divider>
+
+      <div class="stat-row">
+        <div class="stat">
+          <span class="stat-val">{{ user()?.isActive ? 'Active' : 'Inactive' }}</span>
+          <span class="stat-lbl">Account Status</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card card">
+      <h3 class="section-title">Account Details</h3>
+      <div class="info-list stagger-children">
+        <div class="info-item" *ngFor="let item of infoItems()">
+          <div class="info-icon"><mat-icon>{{ item.icon }}</mat-icon></div>
+          <div class="info-content">
+            <span class="info-label">{{ item.label }}</span>
+            <span class="info-value">{{ item.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Card -->
+    <div class="edit-card card">
+      <h3 class="section-title">Edit Profile</h3>
+      <form [formGroup]="form" (ngSubmit)="onSave()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Department</mat-label>
+          <input matInput formControlName="department">
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSaving()" class="save-btn">
+          <mat-spinner *ngIf="isSaving()" diameter="16"></mat-spinner>
+          <mat-icon *ngIf="!isSaving()">save</mat-icon>
+          {{ isSaving() ? 'Saving…' : 'Save Changes' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

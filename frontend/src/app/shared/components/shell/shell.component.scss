@@ -1,0 +1,94 @@
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.shell-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ─── Topbar ───────────────────────────────────────────────────────────────────
+
+.topbar {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.collapse-btn {
+  color: var(--color-text-secondary) !important;
+  &:hover { color: var(--color-text-primary) !important; }
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.env-badge {
+  padding: 3px 10px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-full);
+  color: var(--color-warning);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+
+  strong { color: var(--color-text-primary); font-weight: 600; }
+}
+
+.topbar-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-500));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+
+  &:hover { transform: scale(1.05); }
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+
+.shell-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  background: var(--color-bg);
+}
+
+@media (max-width: 768px) {
+  .shell-content { padding: var(--spacing-md); }
+  .topbar-user .user-greeting { display: none; }
+  .env-badge { display: none; }
+}

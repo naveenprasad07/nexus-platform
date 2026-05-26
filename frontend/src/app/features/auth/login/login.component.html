@@ -1,0 +1,108 @@
+<div class="login-page">
+  <!-- Background decoration -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="login-container animate-fade-in-up">
+    <!-- Brand header -->
+    <div class="brand">
+      <div class="brand-logo">
+        <span class="logo-icon">N</span>
+      </div>
+      <div class="brand-text">
+        <h1 class="brand-name">Nexus</h1>
+        <span class="brand-tagline">Platform</span>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="card-header">
+        <h2 class="card-title">Sign in to your workspace</h2>
+        <p class="card-subtitle">Enter your credentials to access the platform</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Role selector -->
+        <div class="role-selector">
+          <button
+            type="button"
+            *ngFor="let r of roles"
+            class="role-btn"
+            [class.active]="form.get('role')?.value === r.value"
+            (click)="form.get('role')?.setValue(r.value)"
+            matRipple
+          >
+            <mat-icon>{{ r.icon }}</mat-icon>
+            <span>{{ r.label }}</span>
+          </button>
+        </div>
+
+        <!-- User ID -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>User ID</mat-label>
+          <input matInput formControlName="userId" placeholder="e.g. john.doe" autocomplete="username">
+          <mat-icon matPrefix>badge</mat-icon>
+          <mat-error *ngIf="f['userId'].errors?.['required']">User ID is required</mat-error>
+          <mat-error *ngIf="f['userId'].errors?.['minlength']">Minimum 3 characters</mat-error>
+        </mat-form-field>
+
+        <!-- Password -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Your password"
+            autocomplete="current-password"
+          >
+          <mat-icon matPrefix>lock</mat-icon>
+          <button type="button" mat-icon-button matSuffix (click)="togglePassword()">
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="f['password'].errors?.['required']">Password is required</mat-error>
+          <mat-error *ngIf="f['password'].errors?.['minlength']">Minimum 8 characters</mat-error>
+        </mat-form-field>
+
+        <!-- Error message -->
+        <div class="error-banner" *ngIf="loginError()">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ loginError() }}</span>
+        </div>
+
+        <!-- Submit button -->
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="submit-btn"
+          [disabled]="form.invalid || isLoading()"
+          matRipple
+        >
+          <mat-spinner *ngIf="isLoading()" diameter="18" color="accent"></mat-spinner>
+          <mat-icon *ngIf="!isLoading()">login</mat-icon>
+          <span>{{ isLoading() ? 'Authenticating...' : 'Sign In' }}</span>
+        </button>
+      </form>
+
+      <!-- Demo shortcuts -->
+      <div class="demo-section">
+        <p class="demo-label">Quick demo access</p>
+        <div class="demo-btns">
+          <button type="button" class="demo-btn" (click)="fillDemo('admin')" matRipple>
+            <mat-icon>admin_panel_settings</mat-icon>
+            Admin Demo
+          </button>
+          <button type="button" class="demo-btn" (click)="fillDemo('user')" matRipple>
+            <mat-icon>person</mat-icon>
+            User Demo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="login-footer">Nexus Platform v1.0 &mdash; Enterprise Edition</p>
+  </div>
+</div>

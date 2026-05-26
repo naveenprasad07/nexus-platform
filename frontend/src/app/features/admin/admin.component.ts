@@ -14,6 +14,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDividerModule } from '@angular/material/divider';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, catchError, finalize, of } from 'rxjs';
 import { UserApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -31,6 +32,7 @@ import { UserDialogComponent } from './user-dialog.component';
     MatButtonModule, MatIconModule, MatMenuModule,
     MatTooltipModule, MatDialogModule, MatChipsModule,
     MatProgressBarModule, MatSlideToggleModule,
+MatDividerModule
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],

@@ -92,11 +92,11 @@ const UserSchema = new Schema<IUserDocument>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) => {
-        delete ret.password;
-        delete ret.__v;
-        return ret;
-      },
+     transform: (_doc, ret: Record<string, unknown>) => {
+  delete ret['password'];
+  delete ret['__v'];
+  return ret;
+} ,
     },
   }
 );

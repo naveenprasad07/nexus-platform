@@ -1,3 +1,7 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+
 import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { Record } from '../models/Record';
@@ -69,9 +73,12 @@ const seed = async () => {
       { userId: 'ryan.k', email: 'ryan@nexus.dev', firstName: 'Ryan', lastName: 'Kato', department: 'Engineering' },
     ];
 
-    const users = await User.insertMany(
-      usersData.map((u) => ({ ...u, password: 'User@123', role: 'user', isActive: true }))
-    );
+   const users = await Promise.all(
+  usersData.map((u) =>
+    User.create({ ...u, password: 'User@123', role: 'user', isActive: true })
+  )
+);
+
     console.log(`✅ Created ${users.length} users`);
 
     // Seed Records
@@ -112,8 +119,9 @@ const seed = async () => {
   } catch (err) {
     console.error('Seed failed:', err);
   } finally {
+ mongoose.connection.removeAllListeners();
     await mongoose.disconnect();
-  }
+    process.exit(0);  }
 };
 
 seed();

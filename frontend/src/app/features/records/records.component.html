@@ -139,7 +139,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
         <td mat-cell *matCellDef="let row">
           <span class="due-date" *ngIf="row.dueDate"
-            [class.overdue]="row.dueDate && row.status !== 'completed' && (row.dueDate | date:'yyyyMMdd') < ('' | date:'yyyyMMdd')!"
+[class.overdue]="isOverdue(row.dueDate, row.status)"
           >
             {{ row.dueDate | date: 'MMM d, yyyy' }}
           </span>
@@ -175,7 +175,7 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns();" [trackBy]="trackByRecord"></tr>
+<tr mat-row *matRowDef="let row; columns: displayedColumns(); trackBy: trackByRecord"></tr>
 
       <!-- Empty state row -->
       <tr class="mat-row" *matNoDataRow>
@@ -192,8 +192,8 @@
     <!-- Paginator -->
     <div class="paginator-row" *ngIf="meta() && !isLoading()">
       <span class="paginator-info text-muted">
-        Showing {{ ((meta()!.page - 1) * meta()!.limit) + 1 }}–{{ [meta()!.page * meta()!.limit, meta()!.total] | min }} of {{ meta()!.total }}
-      </span>
+  Showing {{ ((meta()!.page - 1) * meta()!.limit) + 1 }}–{{ getPageEnd() }} of {{ meta()!.total }}
+</span>
       <mat-paginator
         [length]="meta()!.total"
         [pageSize]="query.limit!"

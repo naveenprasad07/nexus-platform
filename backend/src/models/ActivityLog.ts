@@ -28,10 +28,10 @@ const ActivityLogSchema = new Schema<IActivityLogDocument>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) => {
-        delete ret.__v;
-        return ret;
-      },
+      transform: (_doc, ret: Record<string, unknown>) => {
+  delete ret['__v'];
+  return ret;
+},
     },
   }
 );

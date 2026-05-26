@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -13,6 +16,7 @@ import { errorHandler, notFound, requestLogger } from './middleware';
 import { logger } from './utils/logger';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
 

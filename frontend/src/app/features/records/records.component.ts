@@ -195,4 +195,15 @@ export class RecordsComponent implements OnInit, OnDestroy {
   }
 
   trackByRecord(_: number, r: RecordItem): string { return r._id; }
+
+  getPageEnd(): number {
+  const m = this.meta();
+  if (!m) return 0;
+  return Math.min(m.page * m.limit, m.total);
+}
+
+isOverdue(dueDate: string | undefined, status: string): boolean {
+  if (!dueDate || status === 'completed') return false;
+  return new Date(dueDate) < new Date();
+}
 }

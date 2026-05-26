@@ -1,7 +1,7 @@
 
 export const environment = {
   production: true,
-  apiUrl: 'https://nexus-backend.onrender.com/api/v1',
+  apiUrl: 'https://nexus-platform-3xvo.onrender.com/api/v1',
   appName: 'Nexus Platform',
   version: '1.0.0',
   defaultPageSize: 10,
